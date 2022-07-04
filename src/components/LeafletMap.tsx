@@ -1,4 +1,4 @@
-import L from "leaflet";
+import L, { LatLngTuple } from "leaflet";
 import {
   TileLayer,
   FeatureGroup,
@@ -9,8 +9,17 @@ import {
 import { EditControl } from "react-leaflet-draw";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
-import { useContext, useEffect, useRef, useState } from "react";
+import {
+  createRef,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AppContext } from "../context/AppProvider";
+import { getGeoJson } from "../services/getData";
+import GeoJSON from "geojson";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -24,87 +33,89 @@ L.Icon.Default.mergeOptions({
 export const LeafletMap = () => {
   const ctx = useContext(AppContext);
 
-  let initEditableFG = new L.FeatureGroup<any>();
-  const [editableFG, setEditableFG] = useState(initEditableFG);
+  const featureGroup = createRef<L.FeatureGroup<any>>();
 
   enum ShapeType {
     RECTANGLE = "rectangle",
     CIRCLE = "circle",
     MARKER = "marker",
     POLYGON = "polygon",
+    POLYLINE = "polyline",
   }
 
-  interface Item {
-    latlngs: { lat: number; lng: number }[];
-    type: ShapeType;
-    mRadius?: number;
-  }
-
-  let initDrawnItems: {
-    [id: string]: Item;
-  } = {};
-  const [drawnItems, setDrawnItems] = useState(initDrawnItems);
+  let initGeoJson: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
+    type: "FeatureCollection",
+    features: [],
+  };
+  const [geoJson, setGeoJson] = useState(initGeoJson);
 
   const onCreated = (e: any) => {
-    console.log(typeof e.layer);
-
     const layer = e.layer;
-    editableFG.addLayer(e.layer);
 
-    console.log(Object.keys(e));
-    console.log(layer);
+    // console.log(featureGroup!.current);
+    if (featureGroup!.current) featureGroup!.current!.addLayer(layer);
+
+    let feature: GeoJSON.Feature<GeoJSON.Geometry> = {
+      type: "Feature",
+      id: layer._leaflet_id,
+      properties: {},
+      geometry: { type: "Polygon", coordinates: [] },
+    };
 
     const layerType = e.layerType;
-    let item: Item = { latlngs: [], type: ShapeType.RECTANGLE };
-
     switch (layerType) {
       case ShapeType.POLYGON: {
-        item.type = ShapeType.POLYGON;
-        item.latlngs = layer._latlngs[0];
+        let coordinates: number[][];
+        coordinates = layer._latlngs[0].map(
+          (ordinate: { lat: number; lng: number }) => {
+            return [ordinate.lat, ordinate.lng];
+          }
+        );
+        feature.geometry = { type: "Polygon", coordinates: [coordinates] };
         break;
       }
 
       case ShapeType.RECTANGLE: {
-        item.type = ShapeType.RECTANGLE;
-        item.latlngs = layer._latlngs[0];
+        let coordinates: number[][];
+        coordinates = layer._latlngs[0].map(
+          (ordinate: { lat: number; lng: number }) => {
+            return [ordinate.lat, ordinate.lng];
+          }
+        );
+
+        const firstOrdinate = layer._latlngs[0][0];
+        coordinates.push([firstOrdinate.lat, firstOrdinate.lng]);
+
+        feature.geometry = { type: "Polygon", coordinates: [coordinates] };
         break;
       }
 
       case ShapeType.CIRCLE: {
-        item.mRadius = layer._mRadius;
-        item.type = ShapeType.CIRCLE;
-        item.latlngs = [layer._latlng];
+        feature.properties = { radius: layer._mRadius };
+        const centerOrdinate = [layer._latlng.lat, layer._latlng.lng];
+        feature.geometry = { type: "Point", coordinates: centerOrdinate };
         break;
       }
 
       case ShapeType.MARKER: {
-        item.type = ShapeType.MARKER;
-        item.latlngs = [layer._latlng];
+        const centerOrdinate = [layer._latlng.lat, layer._latlng.lng];
+        feature.geometry = { type: "Point", coordinates: centerOrdinate };
+        break;
+      }
+
+      case ShapeType.POLYLINE: {
+        const ordinates: number[][] = layer._latlngs.map(
+          (ordinate: { lat: number; lng: number }) => {
+            return Object.values(ordinate);
+          }
+        );
+        feature.geometry = { type: "LineString", coordinates: ordinates };
         break;
       }
     }
-    drawnItems[layer._leaflet_id] = item;
-    console.log(JSON.stringify(drawnItems));
-    setDrawnItems(drawnItems);
 
-    // drawnItems[layer._leaflet_id] = layer._latlngs[0];
-
-    // editableFG.addLayer(e.layer);
-
-    // console.log("Created");
-    // const layers = editableFG.getLayers();
-    // console.log(layers);
-
-    // layers.forEach((layer: any) => {
-    //   //   console.log(Object.keys(layer));
-    //   //   console.log(layer._latlngs);
-    //   //   drawnItems[layer._leaflet_id] = layer._latlngs[0];
-    // });
-    // console.log(JSON.stringify(drawnItems));
-  };
-
-  const onFeatureGroupReady = (reactFGref: any) => {
-    setEditableFG(reactFGref);
+    //console.log(feature);
+    geoJson.features.push(feature);
   };
 
   const onEditStart = () => {
@@ -112,7 +123,16 @@ export const LeafletMap = () => {
   };
 
   const onEdited = () => {
+    console.log(featureGroup!.current?.getLayers());
     console.log("Save");
+    console.log(JSON.stringify(geoJson));
+    ctx?.setGeoJsonData(geoJson);
+    featureGroup!.current?.clearLayers();
+    setGeoJson(initGeoJson);
+
+    //featureGroup!.current!.clearLayers();
+    // const newFG = new L.FeatureGroup<any>();
+    // setEditableFG(newFG);
   };
 
   return (
@@ -126,11 +146,7 @@ export const LeafletMap = () => {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
       />
-      <FeatureGroup
-        ref={(featureGroupRef) => {
-          onFeatureGroupReady(featureGroupRef);
-        }}
-      >
+      <FeatureGroup ref={featureGroup}>
         <EditControl
           position="topright"
           draw={{ circlemarker: false }}
@@ -142,3 +158,5 @@ export const LeafletMap = () => {
     </MapContainer>
   );
 };
+
+

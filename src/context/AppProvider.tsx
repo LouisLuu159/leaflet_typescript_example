@@ -7,6 +7,10 @@ interface AppContextInterface {
   setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
   minZoom: number;
   maxZoom: number;
+  geoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+  setGeoJsonData: React.Dispatch<
+    React.SetStateAction<GeoJSON.FeatureCollection<GeoJSON.Geometry>>
+  >;
 }
 
 export const AppContext = React.createContext<AppContextInterface | null>(null);
@@ -17,6 +21,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const minZoom = 3;
   const maxZoom = 19;
 
+  let initGeoJson: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
+    type: "FeatureCollection",
+    features: [],
+  };
+  const [geoJsonData, setGeoJsonData] = useState(initGeoJson);
+
   const AppCtx: AppContextInterface = {
     center,
     setCenter,
@@ -24,6 +34,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setZoomLevel,
     minZoom,
     maxZoom,
+    geoJsonData,
+    setGeoJsonData,
   };
 
   return (
