@@ -40,7 +40,7 @@ const Legend = () => {
           else grade_txt += "+";
 
           return (
-            <div className="grade">
+            <div className="grade" key={index}>
               <i style={{ background: getColor(grades[index + 1]) }}></i>
               {grade_txt}
             </div>
@@ -170,7 +170,7 @@ L.Icon.Default.mergeOptions({
 });
 
 export const ChoroplethMap = () => {
-  const ctx = useContext(AppContext);
+  //const ctx = useContext(AppContext);
 
   return (
     <MapContainer center={[37.8, -96]} maxZoom={19} zoom={4}>
@@ -178,8 +178,8 @@ export const ChoroplethMap = () => {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
       />
-      <Info />
-      <Legend />
+      {/* <Info />
+      <Legend /> */}
     </MapContainer>
   );
 };

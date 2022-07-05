@@ -1,14 +1,15 @@
 import React from "react";
 import "./App.css";
 import { ChoroplethMap } from "./components/ChoroplethMap";
-// import { LeafletMap } from "./components/LeafletMap";
+import { LeafletMap } from "./components/LeafletMap";
+import { MapWithTooltipPopup } from "./components/MapWithTooltipPopUp";
 import { AppProvider } from "./context/AppProvider";
 
 function App() {
   return (
     <AppProvider>
       <div className="App">
-        <ChoroplethMap />
+        <MapWithTooltipPopup />
       </div>
     </AppProvider>
   );
