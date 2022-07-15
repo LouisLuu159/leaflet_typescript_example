@@ -1,6 +1,7 @@
 import React from "react";
 import "./App.css";
 import { ChoroplethMap } from "./components/ChoroplethMap";
+import { DirectionMap } from "./components/DirectionMap";
 import { LeafletMap } from "./components/LeafletMap";
 import { MapWithTooltipPopup } from "./components/MapWithTooltipPopUp";
 import {
@@ -13,7 +14,11 @@ function App() {
   return (
     <AppProvider>
       <div className="App">
-        <MultiMapLayersControl />
+        {/* <ChoroplethMap /> */}
+        {/* <MapWithTooltipPopup /> */}
+        {/* <MultiMapLayersControl /> */}
+        {/* <MultiLayersControl /> */}
+        <LeafletMap />
       </div>
     </AppProvider>
   );

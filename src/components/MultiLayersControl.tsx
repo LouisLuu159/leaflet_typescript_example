@@ -2,6 +2,7 @@ import L from "leaflet";
 import { LatLngTuple } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { createRef, useEffect } from "react";
+
 import {
   MapContainer,
   LayersControl,
@@ -12,6 +13,7 @@ import {
   Circle,
   Rectangle,
   FeatureGroup,
+  useMap,
 } from "react-leaflet";
 
 const center: LatLngTuple = [51.505, -0.09];
@@ -98,6 +100,7 @@ export const MultiMapLayersControl = () => {
 
   return (
     <MapContainer center={[39.73, -104.99]} zoom={10} scrollWheelZoom={false}>
+      <EventMap />
       <LayersControl position="topright">
         <LayersControl.BaseLayer checked name="Open Street Map">
           <TileLayer
@@ -149,4 +152,17 @@ export const MultiMapLayersControl = () => {
       </LayersControl>
     </MapContainer>
   );
+};
+
+const EventMap = () => {
+  const map = useMap();
+  map.on("contextmenu", function (e) {
+    let popLocation = e.latlng;
+
+    let popup = L.popup()
+      .setLatLng(popLocation)
+      .setContent("<p>Hello world!<br />This is a nice popup.</p>")
+      .openOn(map);
+  });
+  return null;
 };

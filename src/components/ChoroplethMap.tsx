@@ -178,8 +178,8 @@ export const ChoroplethMap = () => {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
       />
-      {/* <Info />
-      <Legend /> */}
+      <Info />
+      <Legend />
     </MapContainer>
   );
 };
