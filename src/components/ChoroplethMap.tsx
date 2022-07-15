@@ -8,7 +8,6 @@ import { AppContext } from "../context/AppProvider";
 
 import GeoJSON from "geojson";
 import statesData from "../data/us_state.json";
-import { updateSourceFile } from "typescript";
 
 const getColor = (d: number): string => {
   return d > 1000
@@ -176,7 +175,7 @@ export const ChoroplethMap = () => {
     <MapContainer center={[37.8, -96]} maxZoom={19} zoom={4}>
       <TileLayer
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <Info />
       <Legend />
