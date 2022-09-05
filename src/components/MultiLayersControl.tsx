@@ -14,6 +14,7 @@ import {
   Rectangle,
   FeatureGroup,
   useMap,
+  Polygon,
 } from "react-leaflet";
 
 const center: LatLngTuple = [51.505, -0.09];
@@ -32,6 +33,14 @@ L.Icon.Default.mergeOptions({
 });
 
 export const MultiLayersControl = () => {
+  const polygon: LatLngTuple[] = [
+    [51.515, -0.09],
+    [51.52, -0.1],
+    [51.52, -0.12],
+  ];
+
+  const purpleOptions = { color: "purple" };
+
   return (
     <MapContainer center={center} zoom={13} scrollWheelZoom={false}>
       <TileLayer
@@ -65,6 +74,7 @@ export const MultiLayersControl = () => {
                 pathOptions={{ color: "green", fillColor: "green" }}
                 radius={100}
               />
+              <Polygon pathOptions={purpleOptions} positions={polygon} />
             </LayerGroup>
           </LayerGroup>
         </LayersControl.Overlay>

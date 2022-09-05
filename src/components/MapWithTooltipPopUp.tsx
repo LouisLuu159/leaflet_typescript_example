@@ -107,10 +107,29 @@ export const MapWithTooltipPopup = () => {
             Click Me
           </button>
         </Popup>
+
         <Tooltip>Tooltip for Marker</Tooltip>
       </Marker>
       <Polygon pathOptions={{ color: "purple" }} positions={multiPolygon}>
-        <Tooltip sticky>sticky Tooltip for Polygon</Tooltip>
+        <Popup>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Love-game-logo-256x256.png"
+            style={{
+              height: "64px",
+              width: "64px",
+              objectFit: "contain",
+              paddingLeft: "5px",
+            }}
+          ></img>
+          <div>This is PopUp</div>
+          <button
+            onClick={() => {
+              console.log("Click");
+            }}
+          >
+            Click Me
+          </button>
+        </Popup>
       </Polygon>
       <Rectangle bounds={rectangle} pathOptions={{ color: "black" }}>
         <Tooltip direction="bottom" offset={[0, 20]} opacity={1} permanent>
